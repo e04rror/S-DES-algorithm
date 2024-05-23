@@ -4,19 +4,19 @@
 #include <string>
 #include <vector>
 
-// Наш ключ
+// Our keys
 const std::bitset<10> KEY("0011011101");
-// перестановка IP
+// IP
 const int IP[] = {2, 6, 3, 1, 4, 8, 5, 7};
-// інверсовани IP
+// inverse IP
 const int IP_1[] = {4, 1, 3, 5, 7, 2, 8, 6};
-// перстановка ключа для P10
+// P10
 const int P10[] = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
-// перестановка ключа для P8
+// P8
 const int P8[] = {6, 3, 7, 4, 8, 5, 10, 9};
 //
 
-// перетворення тексту у двійковий формат
+// transform string(text) to bits
 std::vector<std::bitset<8>> charToBits(std::string &text) {
 
   std::vector<std::bitset<8>> result;
@@ -26,12 +26,12 @@ std::vector<std::bitset<8>> charToBits(std::string &text) {
 
   return result;
 }
-// зміщення уліво
+// shift to left side
 std::bitset<5> leftShift(std::bitset<5> key, int &shift) {
   return (key << shift) | (key >> (5 - shift));
 }
 
-// функція поділу надвоє
+// divide function
 template <size_t T1, size_t T2>
 void divideIntoTwo(std::bitset<T1> &left, std::bitset<T1> &right,
                    std::bitset<T2> &original) {
@@ -41,7 +41,7 @@ void divideIntoTwo(std::bitset<T1> &left, std::bitset<T1> &right,
   }
 }
 
-// функція перестановки
+// permutation
 template <size_t T>
 std::bitset<T> permutation(const std::bitset<T> &input, const int *arrTab) {
   std::bitset<T> output;
@@ -51,7 +51,7 @@ std::bitset<T> permutation(const std::bitset<T> &input, const int *arrTab) {
   return output;
 }
 
-// функція для перестановки P8
+// permutation for P8
 std::bitset<8> permutationP8(const std::bitset<10> &input, const int *arrTab) {
   std::bitset<8> output;
   for (int i = 0; i < output.size(); i++) {
@@ -60,7 +60,7 @@ std::bitset<8> permutationP8(const std::bitset<10> &input, const int *arrTab) {
   return output;
 }
 
-// фестель F функція(XOR ключа і половинки блоку)
+// feistel (i know i need to change)
 std::bitset<4> feistelFunc(const std::bitset<4> &binary_half_block,
                            const std::bitset<8> &round_key) {
   std::bitset<4> result;
@@ -70,7 +70,7 @@ std::bitset<4> feistelFunc(const std::bitset<4> &binary_half_block,
   return result;
 }
 
-// генеруємо P8
+// generate P8
 std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
   std::bitset<10 / 2> left;
   std::bitset<10 / 2> right;
@@ -97,7 +97,7 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
   return result;
 }
 
-// переміщуємо місцями
+// switch
 std::bitset<8> sW(std::bitset<8> afterXor) {
   std::bitset<8 / 2> left, right;
   divideIntoTwo(left, right, afterXor);
@@ -111,7 +111,7 @@ std::bitset<8> sW(std::bitset<8> afterXor) {
   return result;
 }
 
-// головні кроки алгоритму
+// algorithm
 std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
                                  const std::bitset<8> &key1,
                                  const std::bitset<8> &key2) {
@@ -166,7 +166,7 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
   return result;
 }
 
-// вивід вектора значень
+// print vector
 template <typename T> void ShowVector(const std::vector<T> &cont) {
   for (auto element = cont.begin(); element != cont.end(); ++element) {
     std::cout << *element << ' ';
@@ -175,16 +175,16 @@ template <typename T> void ShowVector(const std::vector<T> &cont) {
 }
 
 int main(int argc, char *argv[]) {
-  // вхідні даних
+  // input
   std::string text = "trench";
   std::vector<std::bitset<8>> binaryText = charToBits(text);
   std::cout << "Trench in the binary form: ";
   ShowVector(binaryText);
 
   std::cout << "KEY: " << KEY << std::endl;
-  // перетворення ключа в P10
+  // transform key into P10
   std::bitset<10> peKey = permutation(KEY, P10);
-  // перетворення ключа в p8
+  // transform key into p8
 
   std::cout << "P10:" << peKey << std::endl;
 
@@ -201,8 +201,8 @@ int main(int argc, char *argv[]) {
   std::cout << "\n\n";
 
   auto encryp = sDes(binaryText, k1, k2);
-  
-  std::cout<<"Full encrypted text: ";
+
+  std::cout << "Full encrypted text: ";
   ShowVector(encryp);
 
   return 0;
