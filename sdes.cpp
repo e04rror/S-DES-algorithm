@@ -6,7 +6,7 @@
 
 // Our keys
 const std::bitset<10> KEY("0011011101");
-// IP
+// initial permutation
 const int IP[] = {2, 6, 3, 1, 4, 8, 5, 7};
 // inverse IP
 const int IP_1[] = {4, 1, 3, 5, 7, 2, 8, 6};
@@ -14,7 +14,14 @@ const int IP_1[] = {4, 1, 3, 5, 7, 2, 8, 6};
 const int P10[] = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
 // P8
 const int P8[] = {6, 3, 7, 4, 8, 5, 10, 9};
-//
+// expand permutation
+const int EP[] = {4, 1, 2, 3, 2, 3, 4, 1};
+// P4
+const int P4[] = {2, 4, 3, 1};
+// box S0
+const int S0[4][4] = {{1, 0, 3, 2}, {3, 2, 1, 0}, {0, 2, 1, 3}, {3, 1, 3, 2}};
+// box S1
+const int S1[4][4] = {{0, 1, 2, 3}, {2, 0, 1, 3}, {3, 0, 1, 0}, {2, 1, 0, 3}};
 
 // transform string(text) to bits
 std::vector<std::bitset<8>> charToBits(std::string &text) {
@@ -52,8 +59,10 @@ std::bitset<T> permutation(const std::bitset<T> &input, const int *arrTab) {
 }
 
 // permutation for P8
-std::bitset<8> permutationP8(const std::bitset<10> &input, const int *arrTab) {
-  std::bitset<8> output;
+template <size_t T1, size_t T2>
+std::bitset<T1> permutWithDiffSize(const std::bitset<T2> &input,
+                                   const int *arrTab) {
+  std::bitset<T1> output;
   for (int i = 0; i < output.size(); i++) {
     output[output.size() - i - 1] = input[input.size() - arrTab[i]];
   }
@@ -61,11 +70,11 @@ std::bitset<8> permutationP8(const std::bitset<10> &input, const int *arrTab) {
 }
 
 // feistel (i know i need to change)
-std::bitset<4> feistelFunc(const std::bitset<4> &binary_half_block,
+std::bitset<8> feistelFunc(const std::bitset<8> &binary_half_block,
                            const std::bitset<8> &round_key) {
-  std::bitset<4> result;
+  std::bitset<8> result;
   for (size_t index = 0; index < result.size(); ++index) {
-    result[index] = binary_half_block[index] ^ round_key[index];
+    result[index] = round_key[index] ^ binary_half_block[index];
   }
   return result;
 }
@@ -84,14 +93,14 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
 
   std::cout << "LeftS: " << left << std::endl;
   std::cout << "RightS: " << right << std::endl;
-  //I change to input because I want to show the basic steps of generating keys 
+  // I change to input because I want to show the basic steps of generating keys
   for (size_t index = 0; index < (10 / 2); index++) {
     input[index] = left[index];
     input[index + 5] = right[index];
   }
   std::cout << "PreResult: " << input << std::endl;
 
-  std::bitset<8> result = permutationP8(input, P8);
+  std::bitset<8> result = permutWithDiffSize<8, 10>(input, P8);
 
   return result;
 }
@@ -128,39 +137,15 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
     std::cout << "LEFT SIDE: " << left << std::endl;
     std::cout << "RIGHT SIDE: " << right << std::endl;
 
-    auto firstPart = feistelFunc(left, key1);
-    std::cout << "Feistel first left: " << firstPart << std::endl;
-    for (size_t index = 0; index < firstPart.size(); ++index) {
-      bitRes[index] = right[index];
-      bitRes[index + firstPart.size()] = firstPart[index];
-    }
-    std::cout << "Add left side: " << bitRes << std::endl;
-    auto swit = sW(bitRes);
-    std::cout << "SW: " << swit << std::endl;
+    auto expandPermFirst = permutWithDiffSize<8>(right, EP);
 
-    std::bitset<4> leftAfSw, rightAfSw;
+    std::cout << "Expand Permutation: " << expandPermFirst << std::endl;
 
-    divideIntoTwo(leftAfSw, rightAfSw, swit);
+    auto xorWithExpFirst = feistelFunc(expandPermFirst, key1);
 
-    std::cout << "Leftside: " << leftAfSw << std::endl;
-    std::cout << "Rightside: " << rightAfSw << std::endl;
-
-    auto secondPart = feistelFunc(leftAfSw, key2);
-
-    std::cout << "Feistel second part: " << secondPart << std::endl;
-
-    for (size_t index = 0; index < secondPart.size(); ++index) {
-      bitRes[index] = secondPart[index];
-    }
-
-    std::cout << "Combined block: " << bitRes << std::endl;
-
-    bitRes = permutation(bitRes, IP_1);
-
-    std::cout << "Inverse function IP: " << bitRes << std::endl;
+    std::cout << "After operation XOR: " << xorWithExpFirst << std::endl;
+    std::cout<<std::endl;   
     count++;
-    result.push_back(bitRes);
-    std::cout << std::endl;
   }
   return result;
 }
