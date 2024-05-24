@@ -84,15 +84,14 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
 
   std::cout << "LeftS: " << left << std::endl;
   std::cout << "RightS: " << right << std::endl;
-
-  std::bitset<10> preResult;
+  //I change to input because I want to show the basic steps of generating keys 
   for (size_t index = 0; index < (10 / 2); index++) {
-    preResult[index] = left[index];
-    preResult[index + 5] = right[index];
+    input[index] = left[index];
+    input[index + 5] = right[index];
   }
-  std::cout << "PreResult: " << preResult << std::endl;
+  std::cout << "PreResult: " << input << std::endl;
 
-  std::bitset<8> result = permutationP8(preResult, P8);
+  std::bitset<8> result = permutationP8(input, P8);
 
   return result;
 }
@@ -188,19 +187,19 @@ int main(int argc, char *argv[]) {
 
   std::cout << "P10:" << peKey << std::endl;
 
-  std::bitset<8> k1 = generateP8(peKey);
+  const std::bitset<8> K1 = generateP8(peKey);
 
-  std::cout << "K1:" << k1 << std::endl;
+  std::cout << "K1:" << K1 << std::endl;
 
   std::cout << std::endl;
+  // change this
+  const std::bitset<8> K2 = generateP8(peKey, 2);
 
-  std::bitset<8> k2 = generateP8(peKey, 3);
-
-  std::cout << "K2:" << k2 << std::endl;
+  std::cout << "K2:" << K2 << std::endl;
 
   std::cout << "\n\n";
 
-  auto encryp = sDes(binaryText, k1, k2);
+  auto encryp = sDes(binaryText, K1, K2);
 
   std::cout << "Full encrypted text: ";
   ShowVector(encryp);
