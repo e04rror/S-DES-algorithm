@@ -17,11 +17,13 @@ const int P8[] = {6, 3, 7, 4, 8, 5, 10, 9};
 // expand permutation
 const int EP[] = {4, 1, 2, 3, 2, 3, 4, 1};
 // P4
-const int P4[] = {2, 4, 3, 1};
+const int P4[] = {2, 4, 3, 1}; 
+
+const int SIZE = 4;// i know name is bad
 // box S0
-const int S0[4][4] = {{1, 0, 3, 2}, {3, 2, 1, 0}, {0, 2, 1, 3}, {3, 1, 3, 2}};
+const int S0[SIZE][SIZE] = {{1, 0, 3, 2}, {3, 2, 1, 0}, {0, 2, 1, 3}, {3, 1, 3, 2}};
 // box S1
-const int S1[4][4] = {{0, 1, 2, 3}, {2, 0, 1, 3}, {3, 0, 1, 0}, {2, 1, 0, 3}};
+const int S1[SIZE][SIZE] = {{0, 1, 2, 3}, {2, 0, 1, 3}, {3, 0, 1, 0}, {2, 1, 0, 3}};
 
 // transform string(text) to bits
 std::vector<std::bitset<8>> charToBits(std::string &text) {
@@ -101,8 +103,23 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
   std::cout << "PreResult: " << input << std::endl;
 
   std::bitset<8> result = permutWithDiffSize<8, 10>(input, P8);
-
+  
   return result;
+}
+
+//find the number in the S box
+std::bitset<4> takesNumberFromSBoxe(std::bitset<4>& input, const int SBOX[SIZE][SIZE]){
+  std::bitset<2> row;
+  row[0] = input[0];
+  row[1] = input[3];
+  std::bitset<2> column;
+  column[0] = input[1];
+  column[1] = input[2];
+  std::cout<<"Row: "<<row<<std::endl;
+  std::cout<<"Column: "<<column<<std::endl;
+
+  return 0;
+
 }
 
 // switch
@@ -144,7 +161,16 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
     auto xorWithExpFirst = feistelFunc(expandPermFirst, key1);
 
     std::cout << "After operation XOR: " << xorWithExpFirst << std::endl;
-    std::cout<<std::endl;   
+    
+    std::bitset<4> leftXor, rightXor;
+    divideIntoTwo(leftXor, rightXor, xorWithExpFirst);
+
+    std::cout<<"Left, after xor: "<<leftXor<<std::endl;
+    std::cout<<"Right, after xor: "<<rightXor<<std::endl;
+    
+    auto ato = takesNumberFromSBoxe(leftXor, S0);
+
+    std::cout<<std::endl;
     count++;
   }
   return result;
