@@ -17,13 +17,15 @@ const int P8[] = {6, 3, 7, 4, 8, 5, 10, 9};
 // expand permutation
 const int EP[] = {4, 1, 2, 3, 2, 3, 4, 1};
 // P4
-const int P4[] = {2, 4, 3, 1}; 
+const int P4[] = {2, 4, 3, 1};
 
-const int SIZE = 4;// i know name is bad
+const int SIZE = 4; // i know name is bad
 // box S0
-const int S0[SIZE][SIZE] = {{1, 0, 3, 2}, {3, 2, 1, 0}, {0, 2, 1, 3}, {3, 1, 3, 2}};
+const int S0[SIZE][SIZE] = {
+    {1, 0, 3, 2}, {3, 2, 1, 0}, {0, 2, 1, 3}, {3, 1, 3, 2}};
 // box S1
-const int S1[SIZE][SIZE] = {{0, 1, 2, 3}, {2, 0, 1, 3}, {3, 0, 1, 0}, {2, 1, 0, 3}};
+const int S1[SIZE][SIZE] = {
+    {0, 1, 2, 3}, {2, 0, 1, 3}, {3, 0, 1, 0}, {2, 1, 0, 3}};
 
 // transform string(text) to bits
 std::vector<std::bitset<8>> charToBits(std::string &text) {
@@ -35,6 +37,18 @@ std::vector<std::bitset<8>> charToBits(std::string &text) {
 
   return result;
 }
+
+template <size_t T>
+std::bitset<T> combineIntoOne(const std::bitset<T / 2> &left,
+                              const std::bitset<T / 2> &right) {
+  std::bitset<T> result;
+  for(size_t index = 0; index < (T/2); ++index){
+    result[index] = right[index];
+    result[index + (T/2)] = left[index];
+  } 
+  return result;
+}
+
 // shift to left side
 std::bitset<5> leftShift(std::bitset<5> key, int &shift) {
   return (key << shift) | (key >> (5 - shift));
@@ -73,7 +87,7 @@ std::bitset<T1> permutWithDiffSize(const std::bitset<T2> &input,
 
 template <size_t T>
 std::bitset<T> XOR(const std::bitset<T> &binary_half_block,
-                            const std::bitset<T> &round_key) {
+                   const std::bitset<T> &round_key) {
   std::bitset<T> result;
   for (size_t index = 0; index < result.size(); ++index) {
     result[index] = round_key[index] ^ binary_half_block[index];
@@ -96,36 +110,34 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
   std::cout << "LeftS: " << left << std::endl;
   std::cout << "RightS: " << right << std::endl;
   // I change to input because I want to show the basic steps of generating keys
-  for (size_t index = 0; index < (10 / 2); index++) {
-    input[index] = left[index];
-    input[index + 5] = right[index];
-  }
+  input = combineIntoOne<10>(left, right);
   std::cout << "PreResult: " << input << std::endl;
 
   std::bitset<8> result = permutWithDiffSize<8, 10>(input, P8);
-  
+
   return result;
 }
 
-//find the number in the S box
-std::bitset<2> takesNumberFromSBoxe(std::bitset<4>& input, const int SBOX[SIZE][SIZE]){
+// find the number in the S box
+std::bitset<2> takesNumberFromSBoxe(std::bitset<4> &input,
+                                    const int SBOX[SIZE][SIZE]) {
   std::bitset<2> row;
   row[0] = input[0];
   row[1] = input[3];
   std::bitset<2> column;
   column[0] = input[1];
   column[1] = input[2];
-  std::cout<<"Row: "<<row<<std::endl;
-  std::cout<<"Column: "<<column<<std::endl;
-  //transform binary into decimal
+  std::cout << "Row: " << row << std::endl;
+  std::cout << "Column: " << column << std::endl;
+  // transform binary into decimal
   unsigned long dRow = row.to_ulong();
   unsigned long dColumn = column.to_ulong();
-  std::cout<<"Decimal row: "<<dRow<<std::endl;
-  std::cout<<"Decimal column: "<<dColumn<<std::endl;
+  std::cout << "Decimal row: " << dRow << std::endl;
+  std::cout << "Decimal column: " << dColumn << std::endl;
   int SBox = SBOX[dRow][dColumn];
-  std::cout<<"Sbox: "<<SBox<<std::endl;
+  std::cout << "Sbox: " << SBox << std::endl;
   std::bitset<2> result(SBox);
-  std::cout<<std::endl;
+  std::cout << std::endl;
   return result;
 }
 
@@ -134,12 +146,7 @@ std::bitset<8> sW(std::bitset<8> afterXor) {
   std::bitset<8 / 2> left, right;
   divideIntoTwo(left, right, afterXor);
 
-  std::bitset<8> result;
-
-  for (size_t i = 0; i < (8 / 2); i++) {
-    result[i] = left[i];
-    result[i + (8 / 2)] = right[i];
-  }
+  std::bitset<8> result = combineIntoOne<8>(left, right);
   return result;
 }
 
@@ -168,35 +175,32 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
     auto xorWithExpFirst = XOR(expandPermFirst, key1);
 
     std::cout << "After operation XOR: " << xorWithExpFirst << std::endl;
-    
+
     std::bitset<4> leftXor, rightXor;
     divideIntoTwo(leftXor, rightXor, xorWithExpFirst);
 
-    std::cout<<"Left, after xor: "<<leftXor<<std::endl;
-    std::cout<<"Right, after xor: "<<rightXor<<std::endl;
-    
+    std::cout << "Left, after xor: " << leftXor << std::endl;
+    std::cout << "Right, after xor: " << rightXor << std::endl;
+
     auto sBox0 = takesNumberFromSBoxe(leftXor, S0);
     auto sBox1 = takesNumberFromSBoxe(rightXor, S1);
-    
-    std::bitset<4> combineBoxes; 
 
-    for(int index = 0; index < 2; ++index ) {
-      combineBoxes[index] = sBox1[index];
-      combineBoxes[index + 2] = sBox0[index]; 
-    }
+    std::bitset<4> combineBoxes = combineIntoOne<4>(sBox0, sBox1);
 
-    std::cout<<"After combining boxes: "<<combineBoxes<<std::endl;
-    
-    //perform P4
+    std::cout << "After combining boxes: " << combineBoxes << std::endl;
+
+    // perform P4
     combineBoxes = permutation(combineBoxes, P4);
-    std::cout<<"After P4: "<<combineBoxes<<std::endl;
-    //XOR binary digits from boxes to left side of IP_1
-    
+    std::cout << "After P4: " << combineBoxes << std::endl;
+    // XOR binary digits from boxes to left side of IP_1
+
     std::bitset<4> leftXorCombB = XOR(left, combineBoxes);
 
-    std::cout<<"After left xor output P4: "<<leftXorCombB<<std::endl;
+    std::cout << "After left xor output P4: " << leftXorCombB << std::endl;
 
-    std::cout<<std::endl;
+    std::bitset<8> result = combineIntoOne<8>(leftXorCombB, right);    
+
+    std::cout << std::endl;
     count++;
   }
   return result;
