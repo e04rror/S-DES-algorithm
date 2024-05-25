@@ -71,10 +71,10 @@ std::bitset<T1> permutWithDiffSize(const std::bitset<T2> &input,
   return output;
 }
 
-// feistel (i know i need to change)
-std::bitset<8> feistelFunc(const std::bitset<8> &binary_half_block,
-                           const std::bitset<8> &round_key) {
-  std::bitset<8> result;
+template <size_t T>
+std::bitset<T> XOR(const std::bitset<T> &binary_half_block,
+                            const std::bitset<T> &round_key) {
+  std::bitset<T> result;
   for (size_t index = 0; index < result.size(); ++index) {
     result[index] = round_key[index] ^ binary_half_block[index];
   }
@@ -108,7 +108,7 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
 }
 
 //find the number in the S box
-std::bitset<4> takesNumberFromSBoxe(std::bitset<4>& input, const int SBOX[SIZE][SIZE]){
+std::bitset<2> takesNumberFromSBoxe(std::bitset<4>& input, const int SBOX[SIZE][SIZE]){
   std::bitset<2> row;
   row[0] = input[0];
   row[1] = input[3];
@@ -117,9 +117,16 @@ std::bitset<4> takesNumberFromSBoxe(std::bitset<4>& input, const int SBOX[SIZE][
   column[1] = input[2];
   std::cout<<"Row: "<<row<<std::endl;
   std::cout<<"Column: "<<column<<std::endl;
-
-  return 0;
-
+  //transform binary into decimal
+  unsigned long dRow = row.to_ulong();
+  unsigned long dColumn = column.to_ulong();
+  std::cout<<"Decimal row: "<<dRow<<std::endl;
+  std::cout<<"Decimal column: "<<dColumn<<std::endl;
+  int SBox = SBOX[dRow][dColumn];
+  std::cout<<"Sbox: "<<SBox<<std::endl;
+  std::bitset<2> result(SBox);
+  std::cout<<std::endl;
+  return result;
 }
 
 // switch
@@ -158,7 +165,7 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
 
     std::cout << "Expand Permutation: " << expandPermFirst << std::endl;
 
-    auto xorWithExpFirst = feistelFunc(expandPermFirst, key1);
+    auto xorWithExpFirst = XOR(expandPermFirst, key1);
 
     std::cout << "After operation XOR: " << xorWithExpFirst << std::endl;
     
@@ -168,7 +175,26 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
     std::cout<<"Left, after xor: "<<leftXor<<std::endl;
     std::cout<<"Right, after xor: "<<rightXor<<std::endl;
     
-    auto ato = takesNumberFromSBoxe(leftXor, S0);
+    auto sBox0 = takesNumberFromSBoxe(leftXor, S0);
+    auto sBox1 = takesNumberFromSBoxe(rightXor, S1);
+    
+    std::bitset<4> combineBoxes; 
+
+    for(int index = 0; index < 2; ++index ) {
+      combineBoxes[index] = sBox1[index];
+      combineBoxes[index + 2] = sBox0[index]; 
+    }
+
+    std::cout<<"After combining boxes: "<<combineBoxes<<std::endl;
+    
+    //perform P4
+    combineBoxes = permutation(combineBoxes, P4);
+    std::cout<<"After P4: "<<combineBoxes<<std::endl;
+    //XOR binary digits from boxes to left side of IP_1
+    
+    std::bitset<4> leftXorCombB = XOR(left, combineBoxes);
+
+    std::cout<<"After left xor output P4: "<<leftXorCombB<<std::endl;
 
     std::cout<<std::endl;
     count++;
