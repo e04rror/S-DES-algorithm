@@ -3,29 +3,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "permutation.hpp"
 
-// Our keys
-const std::bitset<10> KEY("0011011101");
-// initial permutation
-const int IP[] = {2, 6, 3, 1, 4, 8, 5, 7};
-// inverse IP
-const int IP_1[] = {4, 1, 3, 5, 7, 2, 8, 6};
-// P10
-const int P10[] = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
-// P8
-const int P8[] = {6, 3, 7, 4, 8, 5, 10, 9};
-// expand permutation
-const int EP[] = {4, 1, 2, 3, 2, 3, 4, 1};
-// P4
-const int P4[] = {2, 4, 3, 1};
-
-const int SIZE = 4; // i know name is bad
-// box S0
-const int S0[SIZE][SIZE] = {
-    {1, 0, 3, 2}, {3, 2, 1, 0}, {0, 2, 1, 3}, {3, 1, 3, 2}};
-// box S1
-const int S1[SIZE][SIZE] = {
-    {0, 1, 2, 3}, {2, 0, 1, 3}, {3, 0, 1, 0}, {2, 1, 0, 3}};
 
 // transform string(text) to bits
 std::vector<std::bitset<8>> charToBits(std::string &text) {
@@ -42,10 +21,10 @@ template <size_t T>
 std::bitset<T> combineIntoOne(const std::bitset<T / 2> &left,
                               const std::bitset<T / 2> &right) {
   std::bitset<T> result;
-  for(size_t index = 0; index < (T/2); ++index){
+  for (size_t index = 0; index < (T / 2); ++index) {
     result[index] = right[index];
-    result[index + (T/2)] = left[index];
-  } 
+    result[index + (T / 2)] = left[index];
+  }
   return result;
 }
 
@@ -141,49 +120,49 @@ std::bitset<2> takesNumberFromSBoxe(std::bitset<4> &input,
   return result;
 }
 
-std::bitset<8> feistel(std::bitset<8>& ip, const std::bitset<8>& key ) {
-    std::bitset<8 / 2> left, right;
-    divideIntoTwo(left, right, ip);
-    std::cout << "LEFT SIDE: " << left << std::endl;
-    std::cout << "RIGHT SIDE: " << right << std::endl;
+std::bitset<8> feistel(std::bitset<8> &ip, const std::bitset<8> &key) {
+  std::bitset<8 / 2> left, right;
+  divideIntoTwo(left, right, ip);
+  std::cout << "LEFT SIDE: " << left << std::endl;
+  std::cout << "RIGHT SIDE: " << right << std::endl;
 
-    auto expandPermFirst = permutWithDiffSize<8>(right, EP);
+  auto expandPermFirst = permutWithDiffSize<8>(right, EP);
 
-    std::cout << "Expand Permutation: " << expandPermFirst << std::endl;
+  std::cout << "Expand Permutation: " << expandPermFirst << std::endl;
 
-    auto xorWithExpFirst = XOR(expandPermFirst, key);
+  auto xorWithExpFirst = XOR(expandPermFirst, key);
 
-    std::cout << "After operation XOR: " << xorWithExpFirst << std::endl;
+  std::cout << "After operation XOR: " << xorWithExpFirst << std::endl;
 
-    std::bitset<4> leftXor, rightXor;
-    divideIntoTwo(leftXor, rightXor, xorWithExpFirst);
+  std::bitset<4> leftXor, rightXor;
+  divideIntoTwo(leftXor, rightXor, xorWithExpFirst);
 
-    std::cout << "Left, after xor: " << leftXor << std::endl;
-    std::cout << "Right, after xor: " << rightXor << std::endl;
+  std::cout << "Left, after xor: " << leftXor << std::endl;
+  std::cout << "Right, after xor: " << rightXor << std::endl;
 
-    auto sBox0 = takesNumberFromSBoxe(leftXor, S0);
-    auto sBox1 = takesNumberFromSBoxe(rightXor, S1);
+  auto sBox0 = takesNumberFromSBoxe(leftXor, S0);
+  auto sBox1 = takesNumberFromSBoxe(rightXor, S1);
 
-    std::bitset<4> combineBoxes = combineIntoOne<4>(sBox0, sBox1);
+  std::bitset<4> combineBoxes = combineIntoOne<4>(sBox0, sBox1);
 
-    std::cout << "After combining boxes: " << combineBoxes << std::endl;
+  std::cout << "After combining boxes: " << combineBoxes << std::endl;
 
-    // perform P4
-    combineBoxes = permutation(combineBoxes, P4);
-    std::cout << "After P4: " << combineBoxes << std::endl;
-    // XOR binary digits from boxes to left side of IP_1
+  // perform P4
+  combineBoxes = permutation(combineBoxes, P4);
+  std::cout << "After P4: " << combineBoxes << std::endl;
+  // XOR binary digits from boxes to left side of IP_1
 
-    std::bitset<4> leftXorCombB = XOR(left, combineBoxes);
+  std::bitset<4> leftXorCombB = XOR(left, combineBoxes);
 
-    std::cout << "After left xor output P4: " << leftXorCombB << std::endl;
+  std::cout << "After left xor output P4: " << leftXorCombB << std::endl;
 
-    std::bitset<8> result = combineIntoOne<8>(leftXorCombB, right);
-  std::cout<<"Final: "<<result<<std::endl;
+  std::bitset<8> result = combineIntoOne<8>(leftXorCombB, right);
+  std::cout << "Final: " << result << std::endl;
   return result;
 }
 
 // switch
-void sW(std::bitset<8>& afterXor) {
+void sW(std::bitset<8> &afterXor) {
   std::bitset<8 / 2> left, right;
   divideIntoTwo(left, right, afterXor);
 
@@ -202,21 +181,21 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
     // IP
     std::bitset<8> initPermut = permutation(seqBit, IP);
     std::cout << "IP: " << initPermut << std::endl;
-    std::cout<<"First Feistel: "<<std::endl;
+    std::cout << "First Feistel: " << std::endl;
     auto firstFeist = feistel(initPermut, key1);
-    std::cout<<std::endl;
-    std::cout<<"Switch: ";
-    
-    sW(firstFeist);
-    
-    std::cout<<firstFeist<<std::endl;
+    std::cout << std::endl;
+    std::cout << "Switch: ";
 
-    std::cout<<"Second FEistel: "<<std::endl;
+    sW(firstFeist);
+
+    std::cout << firstFeist << std::endl;
+
+    std::cout << "Second FEistel: " << std::endl;
     auto secondFeist = feistel(firstFeist, key2);
 
-    std::cout<<std::endl;
+    std::cout << std::endl;
     std::bitset<8> inverseIp = permutation(secondFeist, IP_1);
-    std::cout<<"Block of cipher text: "<<inverseIp<<std::endl;
+    std::cout << "Block of cipher text: " << inverseIp << std::endl;
     result.push_back(inverseIp);
     std::cout << std::endl;
     count++;
