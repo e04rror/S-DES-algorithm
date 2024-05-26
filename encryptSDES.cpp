@@ -141,30 +141,9 @@ std::bitset<2> takesNumberFromSBoxe(std::bitset<4> &input,
   return result;
 }
 
-// switch
-std::bitset<8> sW(std::bitset<8> afterXor) {
-  std::bitset<8 / 2> left, right;
-  divideIntoTwo(left, right, afterXor);
-
-  std::bitset<8> result = combineIntoOne<8>(left, right);
-  return result;
-}
-
-// algorithm
-std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
-                                 const std::bitset<8> &key1,
-                                 const std::bitset<8> &key2) {
-  std::vector<std::bitset<8>> result;
-  int count = 1;
-  for (auto &seqBit : binaryTxt) {
-    std::bitset<8> bitRes;
-    std::cout << count << " block: " << seqBit << std::endl;
-    // IP
-    std::bitset<8> initPermut = permutation(seqBit, IP);
-    std::cout << "IP: " << initPermut << std::endl;
-
+std::bitset<8> feistel(std::bitset<8>& ip, const std::bitset<8>& key ) {
     std::bitset<8 / 2> left, right;
-    divideIntoTwo(left, right, initPermut);
+    divideIntoTwo(left, right, ip);
     std::cout << "LEFT SIDE: " << left << std::endl;
     std::cout << "RIGHT SIDE: " << right << std::endl;
 
@@ -172,7 +151,7 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
 
     std::cout << "Expand Permutation: " << expandPermFirst << std::endl;
 
-    auto xorWithExpFirst = XOR(expandPermFirst, key1);
+    auto xorWithExpFirst = XOR(expandPermFirst, key);
 
     std::cout << "After operation XOR: " << xorWithExpFirst << std::endl;
 
@@ -198,8 +177,47 @@ std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
 
     std::cout << "After left xor output P4: " << leftXorCombB << std::endl;
 
-    std::bitset<8> result = combineIntoOne<8>(leftXorCombB, right);    
+    std::bitset<8> result = combineIntoOne<8>(leftXorCombB, right);
+  std::cout<<"Final: "<<result<<std::endl;
+  return result;
+}
 
+// switch
+void sW(std::bitset<8>& afterXor) {
+  std::bitset<8 / 2> left, right;
+  divideIntoTwo(left, right, afterXor);
+
+  afterXor = combineIntoOne<8>(right, left);
+}
+
+// algorithm
+std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
+                                 const std::bitset<8> &key1,
+                                 const std::bitset<8> &key2) {
+  std::vector<std::bitset<8>> result;
+  int count = 1;
+  for (auto &seqBit : binaryTxt) {
+    std::bitset<8> bitRes;
+    std::cout << count << " block: " << seqBit << std::endl;
+    // IP
+    std::bitset<8> initPermut = permutation(seqBit, IP);
+    std::cout << "IP: " << initPermut << std::endl;
+    std::cout<<"First Feistel: "<<std::endl;
+    auto firstFeist = feistel(initPermut, key1);
+    std::cout<<std::endl;
+    std::cout<<"Switch: ";
+    
+    sW(firstFeist);
+    
+    std::cout<<firstFeist<<std::endl;
+
+    std::cout<<"Second FEistel: "<<std::endl;
+    auto secondFeist = feistel(firstFeist, key2);
+
+    std::cout<<std::endl;
+    std::bitset<8> inverseIp = permutation(secondFeist, IP_1);
+    std::cout<<"Block of cipher text: "<<inverseIp<<std::endl;
+    result.push_back(inverseIp);
     std::cout << std::endl;
     count++;
   }
