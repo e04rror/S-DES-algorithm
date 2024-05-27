@@ -56,26 +56,8 @@ int main(int argc, char *argv[]) {
   std::vector<std::bitset<8>> binaryText = charToBits(text);
   std::cout << "Trench in the binary form: ";
   ShowVector(binaryText);
-
-  std::cout << "KEY: " << KEY << std::endl;
-  // transform key into P10
-  std::bitset<10> peKey = permutation(KEY, P10);
-  // transform key into p8
-
-  std::cout << "P10:" << peKey << std::endl;
-
-  const std::bitset<8> K1 = generateP8(peKey);
-
-  std::cout << "K1:" << K1 << std::endl;
-
-  std::cout << std::endl;
-  // change this
-  const std::bitset<8> K2 = generateP8(peKey, 2);
-
-  std::cout << "K2:" << K2 << std::endl;
-
-  std::cout << "\n\n";
-
+  std::bitset<8> K1, K2;
+  generateKey(K1, K2);
   auto encryp = sDes(binaryText, K1, K2);
 
   std::cout << "Full encrypted text: ";

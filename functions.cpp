@@ -156,3 +156,25 @@ template <typename T> void ShowVector(const std::vector<T> &cont) {
   std::cout << std::endl;
 }
 
+void generateKey(std::bitset<8> &key1, std::bitset<8> &key2) {
+  std::cout << "KEY: " << KEY << std::endl;
+  // transform key into P10
+  std::bitset<10> peKey = permutation(KEY, P10);
+  // transform key into p8
+
+  std::cout << "P10:" << peKey << std::endl;
+
+  key1 = generateP8(peKey);
+
+  std::cout << "K1:" << key1 << std::endl;
+
+  std::cout << std::endl;
+  // change this
+  key2 = generateP8(peKey, 2);
+
+  std::cout << "K2:" << key2 << std::endl;
+
+  std::cout << "\n\n";
+
+}
+
