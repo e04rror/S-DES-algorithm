@@ -17,7 +17,7 @@ std::vector<std::bitset<8>> charToBits(std::string &text) {
   return result;
 }
 
-std::vector<std::bitset<8>> sDes(std::vector<std::bitset<8>> &binaryTxt,
+std::vector<std::bitset<8>> encryption(std::vector<std::bitset<8>> &binaryTxt,
                                  const std::bitset<8> &key1,
                                  const std::bitset<8> &key2) {
   std::vector<std::bitset<8>> result;
@@ -58,10 +58,11 @@ int main(int argc, char *argv[]) {
   ShowVector(binaryText);
   std::bitset<8> K1, K2;
   generateKey(K1, K2);
-  auto encryp = sDes(binaryText, K1, K2);
+  auto encryp = encryption(binaryText, K1, K2);
 
   std::cout << "Full encrypted text: ";
   ShowVector(encryp);
+  writeBitsToFile(encryp, "test.txt");
 
   return 0;
 }

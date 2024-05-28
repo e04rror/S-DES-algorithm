@@ -1,6 +1,9 @@
 #include <bitset>
+#include <cstdio>
+#include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include "permutation.hpp"
 
 template <size_t T1, size_t T2>
@@ -178,3 +181,37 @@ void generateKey(std::bitset<8> &key1, std::bitset<8> &key2) {
 
 }
 
+void writeBitsToFile(const std::vector<std::bitset<8>>& bits, const std::string& filename) {
+  std::ofstream writeFile( filename, std::ios::binary);
+  if(!writeFile.is_open()) {
+    std::cerr<<"Cannot open the file!"<<std::endl;
+    return;
+  }
+
+  for(const auto& element: bits) {
+    writeFile<<element<<' ';
+  }
+  
+  writeFile<<std::endl;
+
+  writeFile.close();
+  std::cout<<"File saved successful"<<std::endl;
+}
+
+void readBitsFromFile(std::vector<std::bitset<8>>& result ,const std::string& filename) {
+  std::ifstream readFile(filename, std::ios::binary);
+  if(!readFile.is_open()) {
+    std::cerr<<"Cannot open the file!"<<std::endl;
+    return;
+  }
+
+    std::string stringFromfile;
+    while (std::getline(readFile, stringFromfile, ' ')) {
+        if (stringFromfile.length() == 8) { 
+            std::bitset<8> cipherBlock(stringFromfile);
+            result.push_back(cipherBlock);
+        }
+    }
+
+  readFile.close();
+}
