@@ -42,5 +42,22 @@ std::vector<std::bitset<8>> decryption(std::vector<std::bitset<8>> &binaryTxt,
 
 
 int main(int argc, char *argv[]) {
+  // Take the data(encrypted text) from the file
+  std::vector<std::bitset<8>> encryptedText;
+  readBitsFromFile(encryptedText, filename);
+  
+  // Defines keys
+  std::bitset<8> K1, K2;
+  
+  // Generate key1 and key2
+  generateKey(K1, K2);
+
+  // Perform decryption
+  auto decrypt = decryption(encryptedText, K1, K2);
+
+  // Display the full decrypted text
+  std::cout << "Full decrypted text: ";
+  ShowVector(decrypt);
+  
   return 0;
 }

@@ -5,6 +5,8 @@
 
 // Our keys
 const std::bitset<10> KEY("0011011101");
+
+const std::string filename = "test.txt";
 // initial permutation
 const int IP[] = {2, 6, 3, 1, 4, 8, 5, 7};
 // inverse IP
