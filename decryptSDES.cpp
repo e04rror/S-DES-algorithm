@@ -5,6 +5,14 @@
 #include "functions.cpp"
 
 //a need a function that transforms bits into symbol
+void transformFunction(const std::vector<std::bitset<8>>& input){
+  for(const auto& bits: input) {
+    unsigned long ulongValue = bits.to_ulong();
+    char character = static_cast<char>(ulongValue);
+    std::cout<<character;
+  }
+  std::cout<<std::endl;
+}
 
 std::vector<std::bitset<8>> decryption(std::vector<std::bitset<8>> &binaryTxt,
                                  const std::bitset<8> &key1,
@@ -58,6 +66,9 @@ int main(int argc, char *argv[]) {
   // Display the full decrypted text
   std::cout << "Full decrypted text: ";
   ShowVector(decrypt);
+
+  std::cout<<"Symbols: ";
+  transformFunction(decrypt);
   
   return 0;
 }
