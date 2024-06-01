@@ -1,9 +1,11 @@
 #include <bitset>
 #include <cstdio>
+#include <future>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <future>
 #include "permutation.hpp"
 
 template <size_t T1, size_t T2>
@@ -60,7 +62,7 @@ std::bitset<5> leftShift(std::bitset<5> key, int &shift) {
 }
 
 
-std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
+std::bitset<8> generateP8(std::bitset<10> &input, int shift ) {
   std::bitset<10 / 2> left;
   std::bitset<10 / 2> right;
 
@@ -73,10 +75,10 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift = 1) {
 
   std::cout << "LeftS: " << left << std::endl;
   std::cout << "RightS: " << right << std::endl;
-  input = combineIntoOne<10>(left, right);
-  std::cout << "PreResult: " << input << std::endl;
+  auto fullBitset = combineIntoOne<10>(left, right);
+  std::cout << "PreResult: " << fullBitset << std::endl;
 
-  std::bitset<8> result = permutWithDiffSize<8, 10>(input, P8);
+  std::bitset<8> result = permutWithDiffSize<8, 10>(fullBitset, P8);
 
   return result;
 }
@@ -160,20 +162,24 @@ template <typename T> void ShowVector(const std::vector<T> &cont) {
 }
 
 void generateKey(std::bitset<8> &key1, std::bitset<8> &key2) {
+  // What if use multithreading for generating 2 keys?
   std::cout << "KEY: " << KEY << std::endl;
   // transform key into P10
   std::bitset<10> peKey = permutation(KEY, P10);
   // transform key into p8
 
   std::cout << "P10:" << peKey << std::endl;
+  
 
-  key1 = generateP8(peKey);
+  auto futureForKey1 = std::async(std::launch::async, generateP8, std::ref(peKey), 1);
+  key1 = futureForKey1.get();
 
   std::cout << "K1:" << key1 << std::endl;
 
   std::cout << std::endl;
-  // change this
-  key2 = generateP8(peKey, 2);
+  
+  auto futureForKey2 = std::async(std::launch::async, generateP8, std::ref(peKey), 3);
+  key2 = futureForKey2.get();
 
   std::cout << "K2:" << key2 << std::endl;
 
