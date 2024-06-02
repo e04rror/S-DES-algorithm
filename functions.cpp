@@ -8,15 +8,18 @@
 #include <future>
 #include "permutation.hpp"
 
-template <size_t T1, size_t T2>
-void divideIntoTwo(std::bitset<T1> &left, std::bitset<T1> &right,
-                   std::bitset<T2> &original) {
-  for (size_t index = 0; index < T1; ++index) {
-    right[index] = original[index];
-    left[index] = original[index + T1];
+// This function divides the input block of bits into two blocks
+// I made the function more universal; it can take an argument with a bitset of different sizes
+template <size_t T1>
+void divideIntoTwo(std::bitset<T1/2> &left, std::bitset<T1/2> &right,
+                   std::bitset<T1> &original) {
+  for (size_t index = 0; index < (T1/2); ++index) {
+    right[index] = original[index]; // The bitset begins counting from the right side 
+    left[index] = original[index + (T1/2)];
   }
 }
 
+// The opposite function to the last one; it combines two equal halves into a big one.
 template <size_t T>
 std::bitset<T> combineIntoOne(const std::bitset<T / 2> &left,
                               const std::bitset<T / 2> &right) {
@@ -84,7 +87,7 @@ std::bitset<8> generateP8(std::bitset<10> &input, int shift ) {
 }
 
 std::bitset<2> takesNumberFromSBoxe(std::bitset<4> &input,
-                                    const int SBOX[SIZE][SIZE]) {
+                                    const int SBOX[SIZE_OF_HALF_BLOCK_EIGHT][SIZE_OF_HALF_BLOCK_EIGHT]) {
   std::bitset<2> row;
   row[0] = input[0];
   row[1] = input[3];

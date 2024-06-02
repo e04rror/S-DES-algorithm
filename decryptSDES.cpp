@@ -47,8 +47,6 @@ std::vector<std::bitset<8>> decryption(std::vector<std::bitset<8>> &binaryTxt,
   return result;
 }
 
-
-
 int main(int argc, char *argv[]) {
   // Take the data(encrypted text) from the file
   std::vector<std::bitset<8>> encryptedText;
