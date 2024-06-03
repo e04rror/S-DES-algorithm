@@ -30,7 +30,7 @@ std::bitset<T> combineIntoOne(const std::bitset<T / 2> &left,
   }
   return result;
 }
-
+ 
 template <size_t T>
 std::bitset<T> permutation(const std::bitset<T> &input, const int *arrTab) {
   std::bitset<T> output;

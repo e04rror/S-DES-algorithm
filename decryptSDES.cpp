@@ -4,7 +4,7 @@
 #include "permutation.hpp"
 #include "functions.cpp"
 
-//a need a function that transforms bits into symbol
+// Transform bits to char
 void transformFunction(const std::vector<std::bitset<8>>& input){
   for(const auto& bits: input) {
     unsigned long ulongValue = bits.to_ulong();
@@ -14,6 +14,7 @@ void transformFunction(const std::vector<std::bitset<8>>& input){
   std::cout<<std::endl;
 }
 
+// The main steps of decryption 
 std::vector<std::bitset<8>> decryption(std::vector<std::bitset<8>> &binaryTxt,
                                  const std::bitset<8> &key1,
                                  const std::bitset<8> &key2) {

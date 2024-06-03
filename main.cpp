@@ -3,28 +3,40 @@
 #include <cstdlib>
 #include <future>
 
-void encrypt(std::promise<void> &obj) {
-  system("./encrypt");
+// Perform encryption and notify once it's done
+void encrypt(std::promise<void> &encryptionPromise) {
+    // Execute the encryption command
+    system("./encrypt");
 
-  std::cout<<"THIS IS DECRYPT!"<<std::endl;
-  obj.set_value();
+    // For understanding where is end of encryption
+    std::cout << "THIS IS DECRYPT!" << std::endl;
+
+    // Notify that encryption is complete
+    encryptionPromise.set_value();
 }
 
-void decrypt(std::future<void> &obj) {
-  obj.wait();
-  system("./decrypt");
+// Wait for encryption to complete and then start decryption
+void decrypt(std::future<void> &encryptionFuture) {
+    // Wait for the signal that encryption is done
+    encryptionFuture.wait();
+
+    // Execute the decryption command
+    system("./decrypt");
 }
 
 int main(){
-  std::promise<void> forEncryptionEnd;
-  std::future<void> waitForEncrypt = forEncryptionEnd.get_future();
+  // Create a promise to signal the end of encryption
+  std::promise<void> encryptionPromise;
+  // Obtain a future to wait for the promise to be fulfilled
+  std::future<void> encryptionFuture = encryptionPromise.get_future();
 
-  std::thread t1(encrypt, std::ref(forEncryptionEnd));
-  std::thread t2(decrypt, std::ref(waitForEncrypt));
+  // Create thread for each function and pass them by the refference
+  std::thread encryptionThread(encrypt, std::ref(encryptionPromise));
+  std::thread decryptionThread(decrypt, std::ref(encryptionFuture));
 
   
-  t1.join();
-  t2.join();
+  encryptionThread.join();
+  decryptionThread.join();
 
   return 0;
 }
